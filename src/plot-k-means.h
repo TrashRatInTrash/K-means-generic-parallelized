@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// if changed then must also update k-means.h
 #define NUMBER_OF_POINTS 20
 #define NUMBER_OF_DIMENSIONS 2
 #define NUMBER_OF_CENTROIDS 3

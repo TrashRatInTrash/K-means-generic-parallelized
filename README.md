@@ -47,6 +47,11 @@ Main function that runs the k-means algorithm on randomly generated points, then
 
 ### Sample run
 
+run with this command
+```
+$ gcc src/unit-test-sequential.c src/k-means-seq.c src/plot-k-means.c -o kmeans_program.o && ./kmeans_program.o
+```
+
 ![[Pasted image 20250314181302.png]]
 \- K-means ran with 200 points, plotted with `gnuplot`
 

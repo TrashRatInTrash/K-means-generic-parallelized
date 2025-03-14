@@ -1,10 +1,11 @@
-
+TODO add images from plots
 
 # K-means sequential means algorithm
 
 - [[#Algorithm used]]
 - [[#Code]]
 - [[#Sample run]]
+- 
 ### Algorithm used
 
 1. Initialize **points** Randomly between 0 and 50
@@ -56,7 +57,6 @@ Running with only 20 points, We can see the centroids spread out further.
 \- K-means ran with 20 points
 
 **Console output:**
-![[Pasted image 20250314181608.png]]
 
 ```
 $ gcc src/unit-test-sequential.c src/k-means-seq.c src/plot-k-means.c -o kmeans_program.o && ./kmeans_program.o

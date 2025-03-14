@@ -11,9 +11,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define K 3
-#define NUM_POINTS 20
-
 /*
   compute squared distance between each point and eahc centroid for each
   centroid using euclidean distance

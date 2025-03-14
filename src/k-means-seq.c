@@ -1,11 +1,7 @@
 
 /*
-  Remote Repo:
-  https://github.com/TrashRatInTrash/K-means-generic-parallelized
-
   A generic sequential K-means implementations
   Works on 1 or more dimensions
-  ---
 */
 
 #include "k-means.h"
@@ -165,7 +161,7 @@ void run_KMeans(int x[NUMBER_OF_POINTS][NUMBER_OF_DIMENSIONS],
 
     // Check for convergence
     if (has_Converged(labels, prev_labels)) {
-      // break;
+      break;
     }
   }
 

@@ -1,4 +1,8 @@
 
+/*
+  Test of K-means-sequential algorithm and gnuplotting
+*/
+
 #include "k-means.h"
 #include "plot-k-means.h"
 #include <stdlib.h>

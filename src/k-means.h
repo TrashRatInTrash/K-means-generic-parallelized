@@ -6,7 +6,7 @@
 #include <omp.h>
 #include <stdio.h>
 
-#define NUMBER_OF_POINTS 200
+#define NUMBER_OF_POINTS 20
 #define NUMBER_OF_DIMENSIONS 2
 #define NUMBER_OF_CENTROIDS 3
 #define MAX_ITERATIONS 100

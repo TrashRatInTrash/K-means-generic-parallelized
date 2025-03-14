@@ -1,4 +1,10 @@
 
+
+/*
+  Plots the points and centroids after k-means
+  works for only 2 dimensions
+*/
+
 #include "plot-k-means.h"
 
 void write_to_file(int points[NUMBER_OF_POINTS][NUMBER_OF_DIMENSIONS],

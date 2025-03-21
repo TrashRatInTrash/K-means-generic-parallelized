@@ -11,6 +11,7 @@
 int read_From_CSV(int x[NUMBER_OF_POINTS][NUMBER_OF_DIMENSIONS]) {
 
   const char *filename = "generated_points.csv";
+  // const char *filename = "points.csv";
 
   FILE *file = fopen(filename, "r");
   if (file == NULL) {
@@ -33,7 +34,7 @@ int read_From_CSV(int x[NUMBER_OF_POINTS][NUMBER_OF_DIMENSIONS]) {
 
 int main(int argc, char *argv[]) {
 
-  omp_set_num_threads(3);
+  omp_set_num_threads(4);
 
   srand(time(0));
 
@@ -49,13 +50,13 @@ int main(int argc, char *argv[]) {
 
   read_From_CSV(x);
 
-  clock_t clock_Time = clock();
+  double start_time = omp_get_wtime();
 
   run_KMeans_parallel(x, cent);
 
-  clock_Time = clock() - clock_Time;
+  double end_time = omp_get_wtime();
 
-  double time_taken = ((double)clock_Time) / CLOCKS_PER_SEC;
+  double time_taken = (end_time - start_time);
   printf("%f seconds\n", time_taken);
 
   return 0;

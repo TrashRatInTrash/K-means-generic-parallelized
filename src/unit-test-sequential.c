@@ -10,6 +10,7 @@
 int read_From_CSV(int x[NUMBER_OF_POINTS][NUMBER_OF_DIMENSIONS]) {
 
   const char *filename = "generated_points.csv";
+  // const char *filename = "points.csv";
 
   FILE *file = fopen(filename, "r");
   if (file == NULL) {

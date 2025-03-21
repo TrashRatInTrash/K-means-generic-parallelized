@@ -203,7 +203,6 @@ void run_KMeans(int x[NUMBER_OF_POINTS][NUMBER_OF_DIMENSIONS],
     // parallelized with reduction
     update_Centroids(x, labels, finalCent);
 
-    update_Centroids(x, labels, finalCent);
     // list_Cluster_Points(x, labels, NUMBER_OF_CENTROIDS);
 
     list_Centroids(finalCent);

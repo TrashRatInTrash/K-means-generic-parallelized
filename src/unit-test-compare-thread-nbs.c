@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <unistd.h>
 
 int read_From_CSV(int x[NUMBER_OF_POINTS][NUMBER_OF_DIMENSIONS]) {
   const char *filename = "generated_points.csv";
@@ -31,6 +32,8 @@ int main(int argc, char *argv[]) {
   // Dataset of points
   int x[NUMBER_OF_POINTS][NUMBER_OF_DIMENSIONS];
 
+  double runtimes[16];
+
   // Read data from CSV
   if (read_From_CSV(x) != 0) {
     fprintf(stderr, "Failed to read data from CSV.\n");
@@ -47,19 +50,24 @@ int main(int argc, char *argv[]) {
     int cent[NUMBER_OF_CENTROIDS][NUMBER_OF_DIMENSIONS];
 
     // Start the clock
-    clock_t clock_Time = clock();
+    double start_time = omp_get_wtime();
 
     // Run K-means
     run_KMeans_parallel(x, cent);
 
     // Stop the clock
-    clock_Time = clock() - clock_Time;
+    double end_time = omp_get_wtime();
 
     // Calculate the time taken
-    double time_taken = ((double)clock_Time) / CLOCKS_PER_SEC;
 
-    // Print the result
-    printf("%d\t%f\n", num_threads, time_taken);
+    double time_taken = (end_time - start_time);
+
+    runtimes[num_threads] = time_taken;
+  }
+
+  for (int num_threads = 1; num_threads <= 16; num_threads++) {
+
+    printf("%d\t%f\n", num_threads, runtimes[num_threads]);
   }
 
   return 0;

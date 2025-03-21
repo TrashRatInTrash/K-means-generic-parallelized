@@ -10,29 +10,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/*
-  compute squared distance between each point and eahc centroid for each
-  centroid using euclidean distance
-*/
-void compute_Distances(int dist[NUMBER_OF_POINTS][NUMBER_OF_CENTROIDS],
-                       int cent[NUMBER_OF_CENTROIDS][NUMBER_OF_DIMENSIONS],
-                       int x[NUMBER_OF_POINTS][NUMBER_OF_DIMENSIONS]) {
-  //
-  printf("PARALLEL: computing distances in parallel\n");
-#pragma omp parallel for shared(dist, cent, x)
-  for (int i_point = 0; i_point < NUMBER_OF_POINTS; i_point++) {
-    for (int i_centroid = 0; i_centroid < NUMBER_OF_CENTROIDS; i_centroid++) {
-      int squared_dist = 0;
-      for (int i_dimension = 0; i_dimension < NUMBER_OF_DIMENSIONS;
-           i_dimension++) {
-        int diff = x[i_point][i_dimension] - cent[i_centroid][i_dimension];
-        squared_dist += diff * diff;
-      }
-      dist[i_point][i_centroid] = squared_dist;
-    }
-  }
 
-  return;
+/*
+  returns the squared distance between 1 point and 1 centroid,
+  no need to parallelize
+*/
+int compute_Distance(int point[NUMBER_OF_DIMENSIONS],
+                     int centroid[NUMBER_OF_DIMENSIONS]) {
+
+  int squared_dist = 0;
+  for (int i_dim = 0; i_dim < NUMBER_OF_DIMENSIONS; i_dim++) {
+    int diff = point[i_dim] - centroid[i_dim];
+    squared_dist += diff * diff;
+  }
+  return squared_dist;
 }
 
 /*
@@ -43,7 +34,7 @@ void update_Centroids(
     int x[NUMBER_OF_POINTS][NUMBER_OF_DIMENSIONS], int labels[NUMBER_OF_POINTS],
     int finalCent[NUMBER_OF_CENTROIDS][NUMBER_OF_DIMENSIONS]) {
 
-  printf("PARALLEL: updating centroids in parallel\n");
+  // printf("PARALLEL: updating centroids in parallel\n");
 
   int count[NUMBER_OF_CENTROIDS] = {0};
   int sum[NUMBER_OF_CENTROIDS][NUMBER_OF_DIMENSIONS] = {0};
@@ -54,12 +45,11 @@ void update_Centroids(
   for (int i_point = 0; i_point < NUMBER_OF_POINTS; i_point++) {
     int cluster = labels[i_point];
     for (int d = 0; d < NUMBER_OF_DIMENSIONS; d++) {
-      sum[cluster][d] += x[i_point][d]; // TODO possible race condition
+      sum[cluster][d] += x[i_point][d];
     }
-    count[cluster]++; // TODO possible race condition
+    count[cluster]++;
   }
 
-#pragma omp parallel for
   for (int i_centroid = 0; i_centroid < NUMBER_OF_CENTROIDS; i_centroid++) {
     for (int d = 0; d < NUMBER_OF_DIMENSIONS; d++) {
       if (count[i_centroid] > 0) {
@@ -70,9 +60,13 @@ void update_Centroids(
 }
 
 /*
+  calculates distance of each points to each centroid
   assign each point to its closest centroid
+
+  parallelized only for outer loop, iterates over points
 */
-void update_Labels(int dist[NUMBER_OF_POINTS][NUMBER_OF_CENTROIDS],
+void update_Labels(int x[NUMBER_OF_POINTS][NUMBER_OF_DIMENSIONS],
+                   int centroid[NUMBER_OF_CENTROIDS][NUMBER_OF_DIMENSIONS],
                    int labels[NUMBER_OF_POINTS]) {
 
 #pragma omp parallel for
@@ -83,8 +77,10 @@ void update_Labels(int dist[NUMBER_OF_POINTS][NUMBER_OF_CENTROIDS],
     // iterate over each centroid and compare their
     // distances to the current point, assign to minimum
     for (int i_centroid = 0; i_centroid < NUMBER_OF_CENTROIDS; i_centroid++) {
-      if (dist[i_point][i_centroid] < min_Dist) {
-        min_Dist = dist[i_point][i_centroid];
+      int squared_distance = compute_Distance(x[i_point], centroid[i_centroid]);
+
+      if (squared_distance < min_Dist) {
+        min_Dist = squared_distance;
         labels[i_point] = i_centroid;
       }
     }
@@ -134,14 +130,14 @@ void select_Specific_Centroids(
     int x[NUMBER_OF_POINTS][NUMBER_OF_DIMENSIONS],
     int finalCent[NUMBER_OF_CENTROIDS][NUMBER_OF_DIMENSIONS]) {
 
-  finalCent[1][0] = x[100][0];
-  finalCent[1][1] = x[100][1];
+  finalCent[0][0] = x[0][0];
+  finalCent[0][1] = x[0][1];
 
-  finalCent[1][0] = x[20][0];
-  finalCent[1][1] = x[20][1];
+  finalCent[1][0] = x[1][0];
+  finalCent[1][1] = x[1][1];
 
-  finalCent[1][0] = x[7000][0];
-  finalCent[1][1] = x[7000][1];
+  finalCent[2][0] = x[2][0];
+  finalCent[2][1] = x[2][1];
 }
 
 void list_Cluster_Points(int points[NUMBER_OF_POINTS][NUMBER_OF_DIMENSIONS],
@@ -182,8 +178,8 @@ void run_KMeans_parallel(
   printf("PARALLEL: running K-means in parallel: \n");
 
   //
-  int labels[NUMBER_OF_POINTS];
-  int prev_labels[NUMBER_OF_POINTS];
+  int labels[NUMBER_OF_POINTS] = {0};
+  int prev_labels[NUMBER_OF_POINTS] = {0};
 
   select_Specific_Centroids(x, finalCent);
   // init_Centroids_Random_Points(x, finalCent);
@@ -195,15 +191,13 @@ void run_KMeans_parallel(
       prev_labels[i] = labels[i];
     }
 
-    /*
-      compute distances can be ran in parallel
-    */
-    int dist[NUMBER_OF_POINTS][NUMBER_OF_CENTROIDS];
-    compute_Distances(dist, finalCent, x);
 
-    update_Labels(dist, labels);
+    // parallelized
+    update_Labels(x, finalCent, labels);
 
+    // parallelized with reduction
     update_Centroids(x, labels, finalCent);
+
     // list_Cluster_Points(x, labels, NUMBER_OF_CENTROIDS);
     list_Centroids(finalCent);
 

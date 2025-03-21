@@ -33,6 +33,17 @@ void compute_Distances(int dist[NUMBER_OF_POINTS][NUMBER_OF_CENTROIDS],
   return;
 }
 
+int compute_Distance(int point[NUMBER_OF_DIMENSIONS],
+                     int centroid[NUMBER_OF_DIMENSIONS]) {
+
+  int squared_dist = 0;
+  for (int d = 0; d < NUMBER_OF_DIMENSIONS; d++) {
+    int diff = point[d] - centroid[d];
+    squared_dist += diff * diff;
+  }
+  return squared_dist;
+}
+
 /*
   count the number of points for each cluster,
   then reset centroid for each cluster as the mean
@@ -56,6 +67,30 @@ void update_Centroids(
     for (int d = 0; d < NUMBER_OF_DIMENSIONS; d++) {
       if (count[i_centroid] > 0) {
         finalCent[i_centroid][d] = sum[i_centroid][d] / count[i_centroid];
+      }
+    }
+  }
+}
+
+/*
+  assign each point to its closest centroid
+*/
+void update_Labels(int x[NUMBER_OF_POINTS][NUMBER_OF_DIMENSIONS],
+                   int centroid[NUMBER_OF_CENTROIDS][NUMBER_OF_DIMENSIONS],
+                   int labels[NUMBER_OF_POINTS]) {
+
+  // iterate over all points, i index of point
+  for (int i_point = 0; i_point < NUMBER_OF_POINTS; i_point++) {
+    int min_Dist = INT_MAX;
+
+    // iterate over each centroid and compare their
+    // distances to the current point, assign to minimum
+    for (int i_centroid = 0; i_centroid < NUMBER_OF_CENTROIDS; i_centroid++) {
+      int squared_distance = compute_Distance(x[i_point], centroid[i_centroid]);
+
+      if (squared_distance < min_Dist) {
+        min_Dist = squared_distance;
+        labels[i_point] = i_centroid;
       }
     }
   }
@@ -136,21 +171,21 @@ void select_Specific_Centroids(
     int x[NUMBER_OF_POINTS][NUMBER_OF_DIMENSIONS],
     int finalCent[NUMBER_OF_CENTROIDS][NUMBER_OF_DIMENSIONS]) {
 
-  finalCent[1][0] = x[100][0];
-  finalCent[1][1] = x[100][1];
+  finalCent[0][0] = x[0][0];
+  finalCent[0][1] = x[0][1];
 
-  finalCent[1][0] = x[20][0];
-  finalCent[1][1] = x[20][1];
+  finalCent[1][0] = x[1][0];
+  finalCent[1][1] = x[1][1];
 
-  finalCent[1][0] = x[7000][0];
-  finalCent[1][1] = x[7000][1];
+  finalCent[2][0] = x[2][0];
+  finalCent[2][1] = x[2][1];
 }
 
 void run_KMeans(int x[NUMBER_OF_POINTS][NUMBER_OF_DIMENSIONS],
                 int finalCent[NUMBER_OF_CENTROIDS][NUMBER_OF_DIMENSIONS]) {
   //
-  int labels[NUMBER_OF_POINTS];
-  int prev_labels[NUMBER_OF_POINTS];
+  int labels[NUMBER_OF_POINTS] = {0};
+  int prev_labels[NUMBER_OF_POINTS] = {0};
 
   select_Specific_Centroids(x, finalCent);
   // init_Centroids_Random_Points(x, finalCent);
@@ -162,22 +197,11 @@ void run_KMeans(int x[NUMBER_OF_POINTS][NUMBER_OF_DIMENSIONS],
       prev_labels[i] = labels[i];
     }
 
-    int dist[NUMBER_OF_POINTS][NUMBER_OF_CENTROIDS];
-    compute_Distances(dist, finalCent, x);
+    // parallelized
+    update_Labels(x, finalCent, labels);
 
-    // iterate over all points, i index of point
-    for (int i_point = 0; i_point < NUMBER_OF_POINTS; i_point++) {
-      int min_Dist = INT_MAX;
-
-      // iterate over each centroid and compare their
-      // distances to the current point, assign to minimum
-      for (int i_centroid = 0; i_centroid < NUMBER_OF_CENTROIDS; i_centroid++) {
-        if (dist[i_point][i_centroid] < min_Dist) {
-          min_Dist = dist[i_point][i_centroid];
-          labels[i_point] = i_centroid;
-        }
-      }
-    }
+    // parallelized with reduction
+    update_Centroids(x, labels, finalCent);
 
     update_Centroids(x, labels, finalCent);
     // list_Cluster_Points(x, labels, NUMBER_OF_CENTROIDS);
@@ -191,13 +215,4 @@ void run_KMeans(int x[NUMBER_OF_POINTS][NUMBER_OF_DIMENSIONS],
   }
 
   return;
-}
-
-void randomize_Points(int x[NUMBER_OF_POINTS][NUMBER_OF_DIMENSIONS],
-                      int min_value, int max_value) {
-  for (int i = 0; i < NUMBER_OF_POINTS; i++) {
-    for (int d = 0; d < NUMBER_OF_DIMENSIONS; d++) {
-      x[i][d] = min_value + rand() % (max_value - min_value + 1);
-    }
-  }
 }

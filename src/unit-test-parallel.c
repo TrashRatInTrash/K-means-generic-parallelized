@@ -4,6 +4,7 @@
 */
 
 #include "k-means.h"
+#include <omp.h>
 #include <stdlib.h>
 #include <time.h>
 
@@ -25,13 +26,14 @@ int read_From_CSV(int x[NUMBER_OF_POINTS][NUMBER_OF_DIMENSIONS]) {
     }
   }
 
-
   fclose(file);
 
   return 0;
 }
 
 int main(int argc, char *argv[]) {
+
+  omp_set_num_threads(16);
 
   srand(time(0));
 

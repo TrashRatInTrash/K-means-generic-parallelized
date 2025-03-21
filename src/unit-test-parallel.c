@@ -33,7 +33,7 @@ int read_From_CSV(int x[NUMBER_OF_POINTS][NUMBER_OF_DIMENSIONS]) {
 
 int main(int argc, char *argv[]) {
 
-  omp_set_num_threads(16);
+  omp_set_num_threads(3);
 
   srand(time(0));
 

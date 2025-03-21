@@ -10,7 +10,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 /*
   returns the squared distance between 1 point and 1 centroid,
   no need to parallelize
@@ -190,7 +189,6 @@ void run_KMeans_parallel(
     for (int i = 0; i < NUMBER_OF_POINTS; i++) {
       prev_labels[i] = labels[i];
     }
-
 
     // parallelized
     update_Labels(x, finalCent, labels);

@@ -132,13 +132,28 @@ void list_Centroids(int Centroids[NUMBER_OF_CENTROIDS][NUMBER_OF_DIMENSIONS]) {
   }
 }
 
+void select_Specific_Centroids(
+    int x[NUMBER_OF_POINTS][NUMBER_OF_DIMENSIONS],
+    int finalCent[NUMBER_OF_CENTROIDS][NUMBER_OF_DIMENSIONS]) {
+
+  finalCent[1][0] = x[100][0];
+  finalCent[1][1] = x[100][1];
+
+  finalCent[1][0] = x[20][0];
+  finalCent[1][1] = x[20][1];
+
+  finalCent[1][0] = x[7000][0];
+  finalCent[1][1] = x[7000][1];
+}
+
 void run_KMeans(int x[NUMBER_OF_POINTS][NUMBER_OF_DIMENSIONS],
                 int finalCent[NUMBER_OF_CENTROIDS][NUMBER_OF_DIMENSIONS]) {
   //
   int labels[NUMBER_OF_POINTS];
   int prev_labels[NUMBER_OF_POINTS];
 
-  init_Centroids_Random_Points(x, finalCent);
+  select_Specific_Centroids(x, finalCent);
+  // init_Centroids_Random_Points(x, finalCent);
 
   for (int i_iter = 0; i_iter < MAX_ITERATIONS; i_iter++) {
     printf("Epoch: %d \n", i_iter + 1);

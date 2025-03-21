@@ -48,7 +48,9 @@ void update_Centroids(
   int count[NUMBER_OF_CENTROIDS] = {0};
   int sum[NUMBER_OF_CENTROIDS][NUMBER_OF_DIMENSIONS] = {0};
 
-#pragma omp parallel for
+#pragma omp parallel for reduction(                                            \
+        + : sum[ : NUMBER_OF_CENTROIDS][ : NUMBER_OF_DIMENSIONS],              \
+            count[ : NUMBER_OF_CENTROIDS])
   for (int i_point = 0; i_point < NUMBER_OF_POINTS; i_point++) {
     int cluster = labels[i_point];
     for (int d = 0; d < NUMBER_OF_DIMENSIONS; d++) {
@@ -183,6 +185,8 @@ void run_KMeans_parallel(
     */
     int dist[NUMBER_OF_POINTS][NUMBER_OF_CENTROIDS];
     compute_Distances(dist, finalCent, x);
+
+    update_Labels(dist, labels);
 
     update_Centroids(x, labels, finalCent);
     // list_Cluster_Points(x, labels, NUMBER_OF_CENTROIDS);

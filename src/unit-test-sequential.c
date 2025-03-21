@@ -4,9 +4,31 @@
 */
 
 #include "k-means.h"
-#include "plot-k-means.h"
 #include <stdlib.h>
 #include <time.h>
+
+int read_From_CSV(int x[NUMBER_OF_POINTS][NUMBER_OF_DIMENSIONS]) {
+
+  const char *filename = "generated_points.csv";
+
+  FILE *file = fopen(filename, "r");
+  if (file == NULL) {
+    perror("error opening file");
+    return -1;
+  }
+
+  int i = 0;
+  while (fscanf(file, "%d,%d", &x[i][0], &x[i][1]) == 2) {
+    i++;
+    if (i >= NUMBER_OF_POINTS) {
+      break; // Avoid exceeding the array bounds
+    }
+  }
+
+  fclose(file);
+
+  return 0;
+}
 
 int main(int argc, char *argv[]) {
 
@@ -22,30 +44,16 @@ int main(int argc, char *argv[]) {
   // Dataset of points
   int x[NUMBER_OF_POINTS][NUMBER_OF_DIMENSIONS];
 
-  randomize_Points(x, 0, 50);
+  read_From_CSV(x);
+
+  clock_t clock_Time = clock();
 
   run_KMeans(x, cent);
 
-  // Write points and centroids to a file
-  write_to_file(x, cent, "kmeans_data.txt");
+  clock_Time = clock() - clock_Time;
 
-  /*
-    Plot using GNUplot, Comment this line to disable gnuplot,
-    also remove included header if not installed
-  */
-  plot_with_gnuplot("kmeans_data.txt");
-
-  // Print final centroids
-  printf("solution:\n");
-  for (int i = 0; i < NUMBER_OF_CENTROIDS; i++) {
-    printf("Centroid %d: (", i);
-    for (int d = 0; d < NUMBER_OF_DIMENSIONS; d++) {
-      printf("%d", cent[i][d]);
-      if (d < NUMBER_OF_DIMENSIONS - 1)
-        printf(", ");
-    }
-    printf(")\n");
-  }
+  double time_taken = ((double)clock_Time) / CLOCKS_PER_SEC;
+  printf("%f seconds\n", time_taken);
 
   return 0;
 }

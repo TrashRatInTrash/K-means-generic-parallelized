@@ -5,7 +5,6 @@
 */
 
 #include "k-means.h"
-#include "plot-k-means.h"
 #include <limits.h>
 #include <omp.h>
 #include <stdio.h>
@@ -74,7 +73,7 @@ void update_Centroids(
 void update_Labels(int dist[NUMBER_OF_POINTS][NUMBER_OF_CENTROIDS],
                    int labels[NUMBER_OF_POINTS]) {
 
-  #pragma omp parallel for
+#pragma omp parallel for
   // iterate over all points, i index of point
   for (int i_point = 0; i_point < NUMBER_OF_POINTS; i_point++) {
     int min_Dist = INT_MAX;
@@ -150,6 +149,17 @@ void list_Cluster_Points(int points[NUMBER_OF_POINTS][NUMBER_OF_DIMENSIONS],
   }
 }
 
+void list_Centroids(int Centroids[NUMBER_OF_CENTROIDS][NUMBER_OF_DIMENSIONS]) {
+
+  for (int i_cent = 0; i_cent < NUMBER_OF_CENTROIDS; i_cent++) {
+    printf("Centroid %d: ", i_cent);
+    for (int i_dim = 0; i_dim < NUMBER_OF_DIMENSIONS; i_dim++) {
+      printf("%d ", Centroids[i_cent][i_dim]);
+    }
+    printf("\n");
+  }
+}
+
 void run_KMeans_parallel(
     int x[NUMBER_OF_POINTS][NUMBER_OF_DIMENSIONS],
     int finalCent[NUMBER_OF_CENTROIDS][NUMBER_OF_DIMENSIONS]) {
@@ -161,7 +171,6 @@ void run_KMeans_parallel(
 
   init_Centroids_Random_Points(x, finalCent);
 
-  // run algorithm for MAX_ITERATIONS, TODO add convergence checks
   for (int i_iter = 0; i_iter < MAX_ITERATIONS; i_iter++) {
     printf("Epoch: %d \n", i_iter + 1);
 
@@ -176,7 +185,8 @@ void run_KMeans_parallel(
     compute_Distances(dist, finalCent, x);
 
     update_Centroids(x, labels, finalCent);
-    list_Cluster_Points(x, labels, NUMBER_OF_CENTROIDS);
+    // list_Cluster_Points(x, labels, NUMBER_OF_CENTROIDS);
+    list_Centroids(finalCent);
 
     // Check for convergence
     if (has_Converged(labels, prev_labels)) {

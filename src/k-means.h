@@ -7,7 +7,7 @@
 #include <stdio.h>
 
 // if changed then must also update plot-k-means.h
-#define NUMBER_OF_POINTS 20
+#define NUMBER_OF_POINTS 20000
 #define NUMBER_OF_DIMENSIONS 2
 #define NUMBER_OF_CENTROIDS 3
 #define MAX_ITERATIONS 100

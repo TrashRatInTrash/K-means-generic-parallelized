@@ -48,7 +48,7 @@ void update_Centroids(
 
   int count[NUMBER_OF_CENTROIDS] = {0};
   int sum[NUMBER_OF_CENTROIDS][NUMBER_OF_DIMENSIONS] = {0};
-  
+
 #pragma omp parallel for
   for (int i_point = 0; i_point < NUMBER_OF_POINTS; i_point++) {
     int cluster = labels[i_point];
@@ -63,6 +63,28 @@ void update_Centroids(
     for (int d = 0; d < NUMBER_OF_DIMENSIONS; d++) {
       if (count[i_centroid] > 0) {
         finalCent[i_centroid][d] = sum[i_centroid][d] / count[i_centroid];
+      }
+    }
+  }
+}
+
+/*
+  assign each point to its closest centroid
+*/
+void update_Labels(int dist[NUMBER_OF_POINTS][NUMBER_OF_CENTROIDS],
+                   int labels[NUMBER_OF_POINTS]) {
+
+  #pragma omp parallel for
+  // iterate over all points, i index of point
+  for (int i_point = 0; i_point < NUMBER_OF_POINTS; i_point++) {
+    int min_Dist = INT_MAX;
+
+    // iterate over each centroid and compare their
+    // distances to the current point, assign to minimum
+    for (int i_centroid = 0; i_centroid < NUMBER_OF_CENTROIDS; i_centroid++) {
+      if (dist[i_point][i_centroid] < min_Dist) {
+        min_Dist = dist[i_point][i_centroid];
+        labels[i_point] = i_centroid;
       }
     }
   }
@@ -152,20 +174,6 @@ void run_KMeans_parallel(
     */
     int dist[NUMBER_OF_POINTS][NUMBER_OF_CENTROIDS];
     compute_Distances(dist, finalCent, x);
-
-    // iterate over all points, i index of point
-    for (int i_point = 0; i_point < NUMBER_OF_POINTS; i_point++) {
-      int min_Dist = INT_MAX;
-
-      // iterate over each centroid and compare their
-      // distances to the current point, assign to minimum
-      for (int i_centroid = 0; i_centroid < NUMBER_OF_CENTROIDS; i_centroid++) {
-        if (dist[i_point][i_centroid] < min_Dist) {
-          min_Dist = dist[i_point][i_centroid];
-          labels[i_point] = i_centroid;
-        }
-      }
-    }
 
     update_Centroids(x, labels, finalCent);
     list_Cluster_Points(x, labels, NUMBER_OF_CENTROIDS);
